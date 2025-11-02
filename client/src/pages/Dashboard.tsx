@@ -1,35 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { MetricCard } from "@/components/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/EmptyState";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { MousePointer, Eye, TrendingUp, Target, PlugZap } from "lucide-react";
-import { Link } from "wouter";
+import { MousePointer, Eye, TrendingUp, Target } from "lucide-react";
 
 export default function Dashboard() {
-  const { data: overviewData, isLoading } = useQuery<any>({
-    queryKey: ["/api/seo/overview"],
-  });
-
-  const { data: connections } = useQuery<any>({
-    queryKey: ["/api/google/connections"],
-  });
-
-  const hasConnections = connections?.analytics || connections?.searchConsole;
-
-  if (!hasConnections && !isLoading) {
-    return (
-      <EmptyState
-        icon={PlugZap}
-        title="Connect Your Google Accounts"
-        description="To see your SEO metrics, you need to connect Google Analytics and Search Console first."
-        actionLabel="Go to Settings"
-        onAction={() => window.location.href = "/settings"}
-      />
-    );
-  }
-
-  const trafficData = overviewData?.trafficTrend || [
+  const trafficData = [
     { date: "Jan 1", clicks: 120, impressions: 3200 },
     { date: "Jan 8", clicks: 145, impressions: 3800 },
     { date: "Jan 15", clicks: 178, impressions: 4200 },
@@ -39,7 +14,7 @@ export default function Dashboard() {
     { date: "Feb 12", clicks: 245, impressions: 5800 },
   ];
 
-  const topPages = overviewData?.topPages || [
+  const topPages = [
     { page: "/blog/seo-tips", clicks: 450, impressions: 8500, ctr: 5.3 },
     { page: "/services", clicks: 320, impressions: 6200, ctr: 5.2 },
     { page: "/", clicks: 280, impressions: 7100, ctr: 3.9 },
@@ -52,42 +27,38 @@ export default function Dashboard() {
       <div>
         <h1 className="text-3xl font-bold mb-2">SEO Overview</h1>
         <p className="text-muted-foreground">
-          Your website's search performance at a glance
+          Your website's search performance at a glance (demo data)
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Total Clicks"
-          value={overviewData?.totalClicks?.toLocaleString() || "1,845"}
+          value="1,845"
           change={12.5}
           changeLabel="vs last period"
           icon={<MousePointer className="w-4 h-4" />}
-          loading={isLoading}
         />
         <MetricCard
           label="Impressions"
-          value={overviewData?.totalImpressions?.toLocaleString() || "45,230"}
+          value="45,230"
           change={8.3}
           changeLabel="vs last period"
           icon={<Eye className="w-4 h-4" />}
-          loading={isLoading}
         />
         <MetricCard
           label="Avg. CTR"
-          value={`${overviewData?.avgCtr?.toFixed(2) || "4.08"}%`}
+          value="4.08%"
           change={2.1}
           changeLabel="vs last period"
           icon={<TrendingUp className="w-4 h-4" />}
-          loading={isLoading}
         />
         <MetricCard
           label="Avg. Position"
-          value={overviewData?.avgPosition?.toFixed(1) || "12.4"}
+          value="12.4"
           change={-5.2}
           changeLabel="improvement"
           icon={<Target className="w-4 h-4" />}
-          loading={isLoading}
         />
       </div>
 
@@ -123,14 +94,14 @@ export default function Dashboard() {
                     dataKey="clicks"
                     stroke="hsl(var(--chart-1))"
                     strokeWidth={2}
-                    dot={{ fill: "hsl(var(--chart-1))" }}
+                    name="Clicks"
                   />
                   <Line
                     type="monotone"
                     dataKey="impressions"
                     stroke="hsl(var(--chart-2))"
                     strokeWidth={2}
-                    dot={{ fill: "hsl(var(--chart-2))" }}
+                    name="Impressions"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -140,7 +111,7 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Top Pages by Clicks</CardTitle>
+            <CardTitle className="text-lg font-semibold">Top Pages</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -155,8 +126,8 @@ export default function Dashboard() {
                   <YAxis
                     type="category"
                     dataKey="page"
-                    width={120}
                     className="text-xs"
+                    width={150}
                     tick={{ fill: "hsl(var(--muted-foreground))" }}
                   />
                   <Tooltip
@@ -176,30 +147,26 @@ export default function Dashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Top Performing Pages</CardTitle>
+          <CardTitle className="text-lg font-semibold">Page Performance Details</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left text-sm font-medium text-muted-foreground px-6 py-3">Page</th>
-                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Clicks</th>
-                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Impressions</th>
-                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">CTR</th>
+                  <th className="text-left py-3 px-4 font-semibold">Page</th>
+                  <th className="text-right py-3 px-4 font-semibold">Clicks</th>
+                  <th className="text-right py-3 px-4 font-semibold">Impressions</th>
+                  <th className="text-right py-3 px-4 font-semibold">CTR</th>
                 </tr>
               </thead>
               <tbody>
                 {topPages.map((page, index) => (
-                  <tr
-                    key={index}
-                    className="border-b hover-elevate"
-                    data-testid={`row-page-${index}`}
-                  >
-                    <td className="px-6 py-3 text-sm font-mono">{page.page}</td>
-                    <td className="px-6 py-3 text-sm text-right font-mono">{page.clicks.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-sm text-right font-mono">{page.impressions.toLocaleString()}</td>
-                    <td className="px-6 py-3 text-sm text-right font-mono">{page.ctr.toFixed(1)}%</td>
+                  <tr key={index} className="border-b hover:bg-muted/50 transition-colors">
+                    <td className="py-3 px-4 font-mono text-sm">{page.page}</td>
+                    <td className="text-right py-3 px-4 font-mono">{page.clicks.toLocaleString()}</td>
+                    <td className="text-right py-3 px-4 font-mono">{page.impressions.toLocaleString()}</td>
+                    <td className="text-right py-3 px-4 font-mono">{page.ctr.toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>

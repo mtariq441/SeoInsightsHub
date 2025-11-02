@@ -1,17 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { EmptyState } from "@/components/EmptyState";
-import { FileText, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 export default function Pages() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: pagesData, isLoading } = useQuery<any>({
-    queryKey: ["/api/seo/pages"],
-  });
 
-  const pages = pagesData || [
+  const pages = [
     { page: "/blog/seo-tips", clicks: 450, impressions: 8500, ctr: 5.3, position: 3.2 },
     { page: "/services", clicks: 320, impressions: 6200, ctr: 5.2, position: 5.8 },
     { page: "/", clicks: 280, impressions: 7100, ctr: 3.9, position: 8.1 },
@@ -22,28 +17,16 @@ export default function Pages() {
     { page: "/blog/local-seo", clicks: 410, impressions: 8900, ctr: 4.6, position: 4.5 },
   ];
 
-  const filteredPages = pages.filter((page: any) =>
+  const filteredPages = pages.filter((page) =>
     page.page.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (!isLoading && pages.length === 0) {
-    return (
-      <EmptyState
-        icon={FileText}
-        title="No Pages Found"
-        description="Connect your Google Search Console account to see page performance data."
-        actionLabel="Go to Settings"
-        onAction={() => window.location.href = "/settings"}
-      />
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Pages</h1>
         <p className="text-muted-foreground">
-          See which pages perform best in search results
+          See which pages perform best in search results (demo data)
         </p>
       </div>
 
@@ -65,47 +48,39 @@ export default function Pages() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-muted animate-pulse rounded" />
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left text-sm font-medium text-muted-foreground px-6 py-3">Page URL</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Clicks</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Impressions</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">CTR</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Avg. Position</th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left text-sm font-medium text-muted-foreground px-6 py-3">Page URL</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Clicks</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Impressions</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">CTR</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Avg. Position</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPages.map((page, index) => (
+                  <tr
+                    key={index}
+                    className="border-b hover-elevate"
+                    data-testid={`row-page-${index}`}
+                  >
+                    <td className="px-6 py-3 text-sm font-mono">{page.page}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{page.clicks.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{page.impressions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{page.ctr.toFixed(1)}%</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">#{page.position.toFixed(1)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredPages.map((page: any, index: number) => (
-                    <tr
-                      key={index}
-                      className="border-b hover-elevate"
-                      data-testid={`row-page-${index}`}
-                    >
-                      <td className="px-6 py-3 text-sm font-mono">{page.page}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{page.clicks.toLocaleString()}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{page.impressions.toLocaleString()}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{page.ctr.toFixed(1)}%</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">#{page.position.toFixed(1)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredPages.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  No pages found matching "{searchTerm}"
-                </div>
-              )}
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+            {filteredPages.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                No pages found matching "{searchTerm}"
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

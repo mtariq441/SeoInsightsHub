@@ -1,30 +1,22 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { PerformanceScoreCard } from "@/components/PerformanceScoreCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState } from "@/components/EmptyState";
-import { Gauge, Smartphone, Monitor, Play } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Gauge, Smartphone, Monitor, Play, Info } from "lucide-react";
 
 export default function Performance() {
   const [url, setUrl] = useState("");
   const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
 
-  const { data: auditData, isLoading, refetch } = useQuery<any>({
-    queryKey: ["/api/lighthouse/audit", url, device],
-    enabled: false,
-  });
-
   const handleRunAudit = () => {
     if (url) {
-      refetch();
+      alert("Performance audit feature requires a backend API integration. This is demo mode.");
     }
   };
-
-  const hasResults = auditData && Object.keys(auditData).length > 0;
 
   return (
     <div className="space-y-6">
@@ -34,6 +26,13 @@ export default function Performance() {
           Analyze your website's speed, SEO, and accessibility with Lighthouse
         </p>
       </div>
+
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Performance audit requires Google PageSpeed Insights API integration. This feature is currently in demo mode.
+        </AlertDescription>
+      </Alert>
 
       <Card>
         <CardHeader>
@@ -68,83 +67,39 @@ export default function Performance() {
 
             <Button
               onClick={handleRunAudit}
-              disabled={!url || isLoading}
+              disabled={!url}
               className="w-full sm:w-auto"
               data-testid="button-run-audit"
             >
               <Play className="w-4 h-4 mr-2" />
-              {isLoading ? "Running Audit..." : "Run Audit"}
+              Run Audit
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="w-32 h-32 mx-auto bg-muted animate-pulse rounded-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : hasResults ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <PerformanceScoreCard
-              title="Performance"
-              score={auditData.performanceScore || 85}
-              icon={<Gauge className="w-4 h-4" />}
-            />
-            <PerformanceScoreCard
-              title="SEO"
-              score={auditData.seoScore || 92}
-              icon={<Gauge className="w-4 h-4" />}
-            />
-            <PerformanceScoreCard
-              title="Accessibility"
-              score={auditData.accessibilityScore || 88}
-              icon={<Gauge className="w-4 h-4" />}
-            />
-            <PerformanceScoreCard
-              title="Best Practices"
-              score={auditData.bestPracticesScore || 90}
-              icon={<Gauge className="w-4 h-4" />}
-            />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Audit Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b">
-                  <span className="text-sm font-medium">URL Audited</span>
-                  <span className="text-sm text-muted-foreground font-mono">{url}</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b">
-                  <span className="text-sm font-medium">Device</span>
-                  <span className="text-sm text-muted-foreground capitalize">{device}</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b">
-                  <span className="text-sm font-medium">Audit Date</span>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      ) : (
-        <EmptyState
-          icon={Gauge}
-          title="No Audit Results Yet"
-          description="Enter a website URL and run a Lighthouse audit to see performance, SEO, accessibility, and best practices scores."
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <PerformanceScoreCard
+          title="Performance"
+          score={85}
+          icon={<Gauge className="w-4 h-4" />}
         />
-      )}
+        <PerformanceScoreCard
+          title="SEO"
+          score={92}
+          icon={<Gauge className="w-4 h-4" />}
+        />
+        <PerformanceScoreCard
+          title="Accessibility"
+          score={88}
+          icon={<Gauge className="w-4 h-4" />}
+        />
+        <PerformanceScoreCard
+          title="Best Practices"
+          score={90}
+          icon={<Gauge className="w-4 h-4" />}
+        />
+      </div>
     </div>
   );
 }

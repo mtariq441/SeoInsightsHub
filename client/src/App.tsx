@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -15,7 +16,7 @@ import Performance from "@/pages/Performance";
 import Analytics from "@/pages/Analytics";
 import Settings from "@/pages/Settings";
 import { User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 function Router() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
@@ -51,14 +52,15 @@ function Router() {
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  const getInitials = (firstName?: string | null, lastName?: string | null, email?: string | null) => {
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase();
-    }
+  const getInitials = (email?: string) => {
     if (email) {
       return email.substring(0, 2).toUpperCase();
     }
     return "U";
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
@@ -71,19 +73,16 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user?.profileImageUrl || undefined} style={{ objectFit: 'cover' }} />
-                  <AvatarFallback>{getInitials(user?.firstName, user?.lastName, user?.email)}</AvatarFallback>
+                  <AvatarFallback>
+                    <User className="w-6 h-6" />
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
                 <div>
-                  <p className="font-semibold">
-                    {user?.firstName && user?.lastName
-                      ? `${user.firstName} ${user.lastName}`
-                      : "My Account"}
-                  </p>
+                  <p className="font-semibold">My Account</p>
                   {user?.email && <p className="text-xs text-muted-foreground">{user.email}</p>}
                 </div>
               </DropdownMenuLabel>
@@ -92,8 +91,8 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
                 <a href="/settings" data-testid="link-settings-menu">Settings</a>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href="/api/logout" data-testid="link-logout">Sign Out</a>
+              <DropdownMenuItem onClick={handleSignOut} data-testid="link-logout">
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

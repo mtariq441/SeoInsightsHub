@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BarChart3, Gauge, Key, FileText, TrendingUp, Zap } from "lucide-react";
+import { Auth } from "@/components/Auth";
 
 export default function Landing() {
+  const [showAuth, setShowAuth] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -13,8 +18,8 @@ export default function Landing() {
             </div>
             <h1 className="text-xl font-bold">SEO Dashboard</h1>
           </div>
-          <Button asChild data-testid="button-login">
-            <a href="/api/login">Sign In</a>
+          <Button onClick={() => setShowAuth(true)} data-testid="button-login">
+            Sign In
           </Button>
         </div>
       </header>
@@ -28,10 +33,8 @@ export default function Landing() {
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Get simple, visual insights from Google Analytics, Search Console, and PageSpeed to help your small business grow online.
             </p>
-            <Button size="lg" asChild data-testid="button-get-started">
-              <a href="/api/login">
-                Get Started Free
-              </a>
+            <Button size="lg" onClick={() => setShowAuth(true)} data-testid="button-get-started">
+              Get Started Free
             </Button>
           </div>
         </section>
@@ -121,10 +124,8 @@ export default function Landing() {
             <p className="text-xl text-muted-foreground mb-8">
               Join small business owners who are growing their online presence with data-driven insights
             </p>
-            <Button size="lg" asChild data-testid="button-start-now">
-              <a href="/api/login">
-                Start Now
-              </a>
+            <Button size="lg" onClick={() => setShowAuth(true)} data-testid="button-start-now">
+              Start Now
             </Button>
           </div>
         </section>
@@ -135,6 +136,15 @@ export default function Landing() {
           <p>© {new Date().getFullYear()} SEO Dashboard. All rights reserved.</p>
         </div>
       </footer>
+
+      <Dialog open={showAuth} onOpenChange={setShowAuth}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Welcome to SEO Dashboard</DialogTitle>
+          </DialogHeader>
+          <Auth />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

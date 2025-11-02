@@ -1,17 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { EmptyState } from "@/components/EmptyState";
-import { Key, Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useState } from "react";
 
 export default function Keywords() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: keywordsData, isLoading } = useQuery<any>({
-    queryKey: ["/api/seo/keywords"],
-  });
 
-  const keywords = keywordsData || [
+  const keywords = [
     { keyword: "seo tips for beginners", position: 3.2, clicks: 450, impressions: 8500, ctr: 5.3, trend: "up" },
     { keyword: "website optimization", position: 5.8, clicks: 320, impressions: 6200, ctr: 5.2, trend: "up" },
     { keyword: "google analytics guide", position: 8.1, clicks: 280, impressions: 7100, ctr: 3.9, trend: "down" },
@@ -22,7 +17,7 @@ export default function Keywords() {
     { keyword: "local seo services", position: 4.5, clicks: 410, impressions: 8900, ctr: 4.6, trend: "up" },
   ];
 
-  const filteredKeywords = keywords.filter((kw: any) =>
+  const filteredKeywords = keywords.filter((kw) =>
     kw.keyword.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -32,24 +27,12 @@ export default function Keywords() {
     return <Minus className="w-4 h-4 text-muted-foreground" />;
   };
 
-  if (!isLoading && keywords.length === 0) {
-    return (
-      <EmptyState
-        icon={Key}
-        title="No Keywords Found"
-        description="Connect your Google Search Console account to see keyword performance data."
-        actionLabel="Go to Settings"
-        onAction={() => window.location.href = "/settings"}
-      />
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Keywords</h1>
         <p className="text-muted-foreground">
-          Track your keyword rankings and search performance
+          Track your keyword rankings and search performance (demo data)
         </p>
       </div>
 
@@ -71,57 +54,49 @@ export default function Keywords() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-muted animate-pulse rounded" />
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left text-sm font-medium text-muted-foreground px-6 py-3">Keyword</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Position</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Clicks</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Impressions</th>
-                    <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">CTR</th>
-                    <th className="text-center text-sm font-medium text-muted-foreground px-6 py-3">Trend</th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left text-sm font-medium text-muted-foreground px-6 py-3">Keyword</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Position</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Clicks</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">Impressions</th>
+                  <th className="text-right text-sm font-medium text-muted-foreground px-6 py-3">CTR</th>
+                  <th className="text-center text-sm font-medium text-muted-foreground px-6 py-3">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredKeywords.map((keyword, index) => (
+                  <tr
+                    key={index}
+                    className="border-b hover-elevate"
+                    data-testid={`row-keyword-${index}`}
+                  >
+                    <td className="px-6 py-3 text-sm">{keyword.keyword}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-muted">
+                        #{keyword.position.toFixed(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{keyword.clicks.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{keyword.impressions.toLocaleString()}</td>
+                    <td className="px-6 py-3 text-sm text-right font-mono">{keyword.ctr.toFixed(1)}%</td>
+                    <td className="px-6 py-3 text-center">
+                      <div className="flex justify-center">
+                        {getTrendIcon(keyword.trend)}
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredKeywords.map((keyword: any, index: number) => (
-                    <tr
-                      key={index}
-                      className="border-b hover-elevate"
-                      data-testid={`row-keyword-${index}`}
-                    >
-                      <td className="px-6 py-3 text-sm">{keyword.keyword}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-muted">
-                          #{keyword.position.toFixed(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{keyword.clicks.toLocaleString()}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{keyword.impressions.toLocaleString()}</td>
-                      <td className="px-6 py-3 text-sm text-right font-mono">{keyword.ctr.toFixed(1)}%</td>
-                      <td className="px-6 py-3 text-center">
-                        <div className="flex justify-center">
-                          {getTrendIcon(keyword.trend)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredKeywords.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  No keywords found matching "{searchTerm}"
-                </div>
-              )}
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+            {filteredKeywords.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                No keywords found matching "{searchTerm}"
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
