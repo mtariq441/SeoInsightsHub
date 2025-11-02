@@ -1,0 +1,9 @@
+server/
+attached_assets/
+.local/
+node_modules/
+dist/
+*.log
+.env
+.env.*
+!.env.example
