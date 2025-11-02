@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/lib/supabase";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -26,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import type { User as UserType } from "@shared/schema";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -52,15 +52,8 @@ function Router() {
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  const getInitials = (email?: string) => {
-    if (email) {
-      return email.substring(0, 2).toUpperCase();
-    }
-    return "U";
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
+  const handleSignOut = () => {
+    window.location.href = '/api/logout';
   };
 
   return (
@@ -83,7 +76,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuLabel>
                 <div>
                   <p className="font-semibold">My Account</p>
-                  {user?.email && <p className="text-xs text-muted-foreground">{user.email}</p>}
+                  {(user as UserType | undefined)?.email && <p className="text-xs text-muted-foreground">{(user as UserType).email}</p>}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
