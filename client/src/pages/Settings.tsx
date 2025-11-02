@@ -26,13 +26,6 @@ export default function Settings() {
     }
   };
 
-  const getInitials = (email?: string) => {
-    if (email) {
-      return email.substring(0, 2).toUpperCase();
-    }
-    return "U";
-  };
-
   if (isLoading || !isAuthenticated) {
     return null;
   }
@@ -61,7 +54,7 @@ export default function Settings() {
             <div className="flex-1">
               <p className="font-semibold">{user?.email}</p>
               <p className="text-sm text-muted-foreground">
-                Member since {new Date(user?.created_at || '').toLocaleDateString()}
+                Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <Button variant="destructive" onClick={handleLogout} data-testid="button-logout">
