@@ -1,25 +1,29 @@
-import { exec } from 'child_process';
+import express from "express";
+import { registerRoutes } from "./routes";
+import { createServer as createViteServer } from "vite";
 
-const viteProcess = exec('npx vite --host 0.0.0.0 --port 5000', {
-  cwd: process.cwd(),
-});
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-viteProcess.stdout?.pipe(process.stdout);
-viteProcess.stderr?.pipe(process.stderr);
+const PORT = 5000;
 
-viteProcess.on('error', (error) => {
-  console.error('Error running Vite:', error);
-  process.exit(1);
-});
+async function startServer() {
+  const httpServer = await registerRoutes(app);
 
-viteProcess.on('exit', (code) => {
-  process.exit(code || 0);
-});
+  if (process.env.NODE_ENV === "development") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    app.use(express.static("dist/public"));
+  }
 
-process.on('SIGTERM', () => {
-  viteProcess.kill('SIGTERM');
-});
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
-process.on('SIGINT', () => {
-  viteProcess.kill('SIGINT');
-});
+startServer();
