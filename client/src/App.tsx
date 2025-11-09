@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/lib/supabase";
+import type { User } from "@shared/schema";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -15,7 +15,7 @@ import Keywords from "@/pages/Keywords";
 import Performance from "@/pages/Performance";
 import Analytics from "@/pages/Analytics";
 import Settings from "@/pages/Settings";
-import { User } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -50,10 +50,10 @@ function Router() {
 }
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | undefined };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
+  const handleSignOut = () => {
+    window.location.href = '/api/logout';
   };
 
   return (
@@ -67,7 +67,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
-                    <User className="w-6 h-6" />
+                    <UserIcon className="w-6 h-6" />
                   </AvatarFallback>
                 </Avatar>
               </Button>

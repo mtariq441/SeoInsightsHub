@@ -1,29 +1,23 @@
 import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { LogOut, User as UserIcon } from "lucide-react";
 
 export default function Settings() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth() as { user: User | undefined, isLoading: boolean, isAuthenticated: boolean };
   const { toast } = useToast();
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
-    }
+  const handleLogout = () => {
+    toast({
+      title: "Signing out",
+      description: "Redirecting to logout...",
+    });
+    setTimeout(() => {
+      window.location.href = '/api/logout';
+    }, 500);
   };
 
   if (isLoading || !isAuthenticated) {
@@ -48,13 +42,13 @@ export default function Settings() {
           <CardContent className="flex items-center gap-4">
             <Avatar className="w-16 h-16">
               <AvatarFallback>
-                <User className="w-8 h-8" />
+                <UserIcon className="w-8 h-8" />
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <p className="font-semibold">{user?.email}</p>
               <p className="text-sm text-muted-foreground">
-                Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <Button variant="destructive" onClick={handleLogout} data-testid="button-logout">
