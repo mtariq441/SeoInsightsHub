@@ -90,15 +90,23 @@ export async function setupAuth(app: Express) {
 
   const registeredStrategies = new Set<string>();
 
-  const ensureStrategy = (domain: string) => {
-    const strategyName = `replitauth:${domain}`;
+  const getBaseUrl = (req: any): string => {
+    if (process.env.REPLIT_DEV_DOMAIN) {
+      return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+    }
+    const protocol = (req.secure || process.env.NODE_ENV === "production") ? "https" : "http";
+    return `${protocol}://${req.get("host")}`;
+  };
+
+  const ensureStrategy = (baseUrl: string) => {
+    const strategyName = `replitauth:${baseUrl}`;
     if (!registeredStrategies.has(strategyName)) {
       const strategy = new Strategy(
         {
           name: strategyName,
           config,
           scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
+          callbackURL: `${baseUrl}/api/callback`,
         },
         verify,
       );
@@ -111,27 +119,30 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const baseUrl = getBaseUrl(req);
+    ensureStrategy(baseUrl);
+    passport.authenticate(`replitauth:${baseUrl}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const baseUrl = getBaseUrl(req);
+    ensureStrategy(baseUrl);
+    passport.authenticate(`replitauth:${baseUrl}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
 
   app.get("/api/logout", (req, res) => {
+    const baseUrl = getBaseUrl(req);
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: baseUrl,
         }).href
       );
     });
